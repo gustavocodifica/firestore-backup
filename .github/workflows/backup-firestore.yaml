@@ -21,4 +21,4 @@ jobs:
 
       - name: Backup Firestore
         run: |
-          gcloud firestore export gs://backup-crm-gcvendas/firestore-$(date +%F)
+          gcloud firestore export gs://gcvendas-backup/firestore-$(date +%F)
