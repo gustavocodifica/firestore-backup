@@ -3,17 +3,23 @@ name: Firestore Backup
 on:
   schedule:
     - cron: "0 * * * *"
+  workflow_dispatch:
 
 jobs:
   backup:
     runs-on: ubuntu-latest
     steps:
-      - name: Setup gcloud
+      - name: Google Cloud Auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Google Cloud Setup
         uses: google-github-actions/setup-gcloud@v2
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          install_components: "beta,cloud-firestore"
 
-      - name: Firestore export
+      - name: Backup Firestore
         run: |
           gcloud firestore export gs://backup-crm-gcvendas/firestore-$(date +%F)
