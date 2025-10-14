@@ -1,0 +1,24 @@
+name: Auth Backup
+
+on:
+  schedule:
+    - cron: "5 6 1 * *"
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Google Cloud Auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Google Cloud Setup
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Backup Firestore
+        run: |
+          gcloud auth export gs://backup-gclient/backup-auth/auth-$(date +%F)
