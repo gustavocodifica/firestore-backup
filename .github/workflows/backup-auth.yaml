@@ -21,4 +21,4 @@ jobs:
 
       - name: Backup Firestore
         run: |
-          gcloud auth export gs://backup-gclient/backup-auth/auth-$(date +%F)
+          gcloud identitytoolkit export-users gs://backup-gclient/backup-auth/auth-$(date +%F).json
