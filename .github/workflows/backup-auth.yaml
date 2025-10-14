@@ -24,4 +24,4 @@ jobs:
 
       - name: Backup Auth
         run: |
-          gcloud identitytoolkit export-users gs://backup-gclient/backup-auth/auth-$(date +%F).json
+          gcloud alpha identitytoolkit export-users gs://backup-gclient/backup-auth/auth-$(date +%F).json
