@@ -19,6 +19,9 @@ jobs:
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
-      - name: Backup Firestore
+      - name: Install gcloud alpha component
+        run: gcloud components install alpha --quiet
+
+      - name: Backup Auth
         run: |
           gcloud identitytoolkit export-users gs://backup-gclient/backup-auth/auth-$(date +%F).json
