@@ -2,7 +2,7 @@ name: Auth Backup
 
 on:
   schedule:
-    - cron: "5 6 1 * *"
+    - cron: "5 6 1 * *" # Todo dia 1º do mês às 06:05
   workflow_dispatch:
 
 jobs:
@@ -19,9 +19,43 @@ jobs:
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
-      - name: Install gcloud alpha component
-        run: gcloud components install alpha --quiet
-
-      - name: Backup Auth
+      - name: Generate Access Token
         run: |
-          gcloud alpha identitytoolkit export-users gs://backup-gclient/backup-auth/auth-$(date +%F).json
+          echo "ACCESS_TOKEN=$(gcloud auth print-access-token)" >> $GITHUB_ENV
+
+      - name: Backup Auth (paginação automática)
+        env:
+          ACCESS_TOKEN: ${{ env.ACCESS_TOKEN }}
+          PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+        run: |
+          FILE="auth-backup-$(date +%F).json"
+          NEXT_PAGE_TOKEN=""
+
+          echo "[" > $FILE
+
+          while true; do
+            echo "📦 Exportando usuários (token: $NEXT_PAGE_TOKEN)"
+
+            RESPONSE=$(curl -s -X POST "https://identitytoolkit.googleapis.com/v1/projects/$PROJECT_ID/accounts:query" \
+              -H "Authorization: Bearer $ACCESS_TOKEN" \
+              -H "Content-Type: application/json" \
+              -d "$(jq -n --arg token "$NEXT_PAGE_TOKEN" '{maxResults: 1000, nextPageToken: $token | select(length > 0)}')")
+
+            USERS=$(echo "$RESPONSE" | jq '.users // []')
+
+            # Adiciona usuários ao arquivo
+            echo "$USERS" | jq -c '.[]' | sed 's/$/,/' >> $FILE
+
+            NEXT_PAGE_TOKEN=$(echo "$RESPONSE" | jq -r '.nextPageToken // empty')
+
+            # Se não tiver mais página, sai
+            if [ -z "$NEXT_PAGE_TOKEN" ]; then
+              break
+            fi
+          done
+
+          # Fecha o JSON corretamente
+          echo "{}]" >> $FILE
+
+          echo "✅ Backup concluído. Enviando para o bucket..."
+          gsutil cp "$FILE" gs://backup-gclient/backup-auth/$FILE
