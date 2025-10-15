@@ -1,0 +1,25 @@
+name: Storage Backup
+
+on:
+  schedule:
+    - cron: "5 6 1 * *"
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Google Cloud Auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Google Cloud Setup
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          install_components: "storage"
+
+      - name: Backup Storage
+        run: |
+          gcloud storage cp -r gs://client-e600a.appspot.com gs://meu-bucket-backup/storage-backup-$(date +%F)/
