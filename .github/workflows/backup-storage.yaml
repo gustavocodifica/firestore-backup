@@ -21,4 +21,4 @@ jobs:
 
       - name: Backup Storage
         run: |
-          gcloud storage cp -r gs://client-e600a.appspot.com gs://meu-bucket-backup/storage-backup-$(date +%F)/
+          gcloud storage cp -r gs://client-e600a.appspot.com gs:/backup-gclient/storage-backup-$(date +%F)/
