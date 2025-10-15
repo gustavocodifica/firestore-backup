@@ -25,4 +25,4 @@ jobs:
         env:
           GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
           BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
-        run: node ./src/auth-backup.js
+        run: node src/backup-auth.js
