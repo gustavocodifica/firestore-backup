@@ -3,11 +3,9 @@ import fs from "fs";
 
 import { Storage } from "@google-cloud/storage";
 
-const serviceAccount = JSON.parse(
-  fs.readFileSync("./serviceAccountKey.json", "utf8")
-);
+const serviceAccount = JSON.parse(process.env.GCP_SA_KEY);
 
-const bucketName = "backup-gclient";
+const bucketName = process.env.BUCKET_NAME;
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
